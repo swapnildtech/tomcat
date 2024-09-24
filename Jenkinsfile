@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Validate GitHub Token') {
             steps {
-                withCredentials([string(credentialsId: 'jenkin-personal1', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([string(credentialsId: 'jenkin-personal', variable: 'GITHUB_TOKEN')]) {
                     script {
                         def response = sh(script: """
                             curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token \$GITHUB_TOKEN" \
