@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_TOKEN = credentials('jenkin-personal') // Use the ID of your GitHub token credential
+        GITHUB_TOKEN = credentials('jenkin-personal1') // Use the ID of your GitHub token credential
         GITHUB_REPO = 'swapnildtech/tomcat' // Your repository
         GITHUB_SHA = '' // Initialize, will set in stages
     }
