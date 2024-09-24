@@ -97,10 +97,12 @@ pipeline {
 }
 
 def updateGitHubStatus(String status) {
-    echo "Updating GitHub status to '${status}' for commit SHA '${GITHUB_SHA}'"
-    sh """
-        curl -X POST -H "Authorization: token \$GITHUB_TOKEN" \
-        -d '{"state": "${status}", "context": "continuous-integration/jenkins"}' \
-        "https://api.github.com/repos/${GITHUB_REPO}/statuses/${GITHUB_SHA}"
-    """
+    withCredentials([string(credentialsId: 'jenkin-personal', variable: 'GITHUB_TOKEN')]) {
+        echo "Updating GitHub status to '${status}' for commit SHA '${GITHUB_SHA}'"
+        sh """
+            curl -X POST -H "Authorization: token \$GITHUB_TOKEN" \
+            -d '{"state": "${status}", "context": "continuous-integration/jenkins"}' \
+            "https://api.github.com/repos/${GITHUB_REPO}/statuses/${GITHUB_SHA}"
+        """
+    }
 }
