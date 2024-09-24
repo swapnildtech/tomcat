@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_TOKEN = credentials('jenkin-personal') // Use the ID of your GitHub token credential
-        GITHUB_REPO = 'Swapnil011/tomcat' // Your repository
+        GITHUB_REPO = 'swapnildtech/tomcat' // Your repository
         GITHUB_SHA = '' // Initialize, will set in stages
     }
 
