@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Validate GitHub Token') {
             steps {
-                withCredentials([string(credentialsId: 'jenkin-personal', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([string(credentialsId: 'jenkin-personal1', variable: 'GITHUB_TOKEN')]) {
                     script {
                         def response = sh(script: """
                             curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token \$GITHUB_TOKEN" \
@@ -31,7 +31,6 @@ pipeline {
                 script {
                     echo 'Preparing for the pipeline...'
                     echo "BRANCH NAME: ${env.BRANCH_NAME}"
-                    echo sh(returnStdout: true, script: 'env')
                 }
             }
         }
@@ -40,7 +39,6 @@ pipeline {
             steps {
                 script {
                     echo 'Running tests...'
-                    // Simulate a test command
                     def testResult = sh(script: 'echo "Test passed!"', returnStdout: true).trim()
                     echo "Test Result: ${testResult}"
                 }
@@ -51,10 +49,8 @@ pipeline {
             steps {
                 script {
                     echo 'Build Started'
-                    // Capture the GIT_COMMIT SHA in this stage
                     GITHUB_SHA = env.GIT_COMMIT ?: sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     echo "Using GITHUB_SHA: ${GITHUB_SHA}"
-                    // Simulate a build command
                     sh 'echo "Building application..."'
                 }
             }
@@ -67,7 +63,6 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying Application'
-                    // Simulate a deployment command
                     sh 'echo "Application deployed!"'
                 }
             }
@@ -77,19 +72,19 @@ pipeline {
     post {
         success {
             script {
-                echo "Commit SHA is: ${GITHUB_SHA}" // Ensure correct SHA is set
+                echo "Commit SHA is: ${GITHUB_SHA}"
                 updateGitHubStatus('success')
             }
         }
         failure {
             script {
-                echo "Commit SHA is: ${GITHUB_SHA}" // Ensure correct SHA is set
+                echo "Commit SHA is: ${GITHUB_SHA}"
                 updateGitHubStatus('failure')
             }
         }
         unstable {
             script {
-                echo "Commit SHA is: ${GITHUB_SHA}" // Ensure correct SHA is set
+                echo "Commit SHA is: ${GITHUB_SHA}"
                 updateGitHubStatus('error')
             }
         }
@@ -100,13 +95,16 @@ def updateGitHubStatus(String status) {
     withCredentials([string(credentialsId: 'jenkin-personal1', variable: 'GITHUB_TOKEN')]) {
         echo "Updating GitHub status to '${status}' for commit SHA '${GITHUB_SHA}'"
         def response = sh(script: """
-            curl -X POST -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer \$GITHUB_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPO}/statuses/${GITHUB_SHA}" \
-            -d '{"state": "${status}", "context": "continuous-integration/jenkins"}' 
+            curl -X POST -H "Authorization: token \$GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{"state": "${status}", "context": "continuous-integration/jenkins"}' \
+            "https://api.github.com/repos/${GITHUB_REPO}/statuses/${GITHUB_SHA}"
         """, returnStdout: true).trim()
         
         echo "GitHub response: ${response}"
+
+        if (response.contains("Resource not accessible by personal access token")) {
+            error "Failed to update status: ${response}"
+        }
     }
 }
