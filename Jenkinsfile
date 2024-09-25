@@ -8,7 +8,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the repository using SSH
-                git branch: 'main', credentialsId: 'p-git-access', url: 'git@github.com:swapnildtech/tomcat.git'
+                git branch: 'main', credentialsId: 'github-ssh-key', url: 'git@github.com:swapnildtech/tomcat.git'
             }
         }
         stage('Validate SSH Key Connectivity') {
